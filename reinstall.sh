@@ -19,7 +19,26 @@ set -eE
 # that later commit changes only this line, so the SHA below can name the commit
 # holding all the content files. A branch here would mean a machine installed
 # six months from now silently gets different helper scripts.
-confhome=https://raw.githubusercontent.com/amaiko-ai/reinstall/355a68139b67aa703d2174b25c620a52ae5d9622
+# THIS REPO, PINNED, AND THE TOKEN IS ADDED AT RUN TIME.
+#
+# confhome is hardcoded upstream with no flag and no environment override — that
+# is the entire reason a patched copy exists. Every helper file the installer
+# fetches mid-install comes from here, including windows-openssh.bat.
+#
+# Pinned to a commit, not a branch, because upstream's own commit-pinning code
+# is dead (guarded by `if false &&`, marked untested), so whatever ref this
+# names is consumed verbatim. A branch would mean a machine rebuilt months from
+# now silently installs with different helper scripts.
+#
+# THE REPO IS PRIVATE, so these fetches need credentials, and GitHub answers 404
+# rather than 401 for private content — challenge-response auth therefore never
+# fires and only PREEMPTIVE credentials work. cloud-init rewrites the scheme and
+# host of the line below to embed a read-only token before running this script.
+# Measured in an Alpine container, which is what the install stage actually runs:
+# aria2c (in-URL, --http-user, --header) and busybox wget all authenticate that
+# way. GNU wget does not, and does not appear on any confhome path — the Debian
+# stage uses curl exclusively, the Alpine stage busybox wget and aria2c.
+confhome=https://raw.githubusercontent.com/amaiko-ai/reinstall-windows/624d41273bfd3236523a68702c3893aca63c3e7d
 
 # BLANKED, NOT REPOINTED. This is used only when is_in_china detects a Chinese
 # network, and a false positive here would be a quiet disaster: it would fetch
